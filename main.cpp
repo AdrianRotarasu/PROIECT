@@ -394,7 +394,10 @@ public:
     {
         return player[i].getName();
     }
-
+    void setPSalary(int i,float salary)
+    {
+        player[i].setSalary(salary);
+    }
     void playerswap(int i, int j)
     {
         Player aux;
@@ -423,7 +426,7 @@ public:
 ostream& operator<<(ostream& os, Team& dt)
 {
     srand((unsigned)time(0));
-    os<<dt.getName() <<" with "<< dt.getStats(0) + rand() % 20 <<" points to "<<dt.getStats(0) + rand() % 20+10 <<" points\n";
+    os<<dt.getName() <<" with "<< dt.getStats(0) + rand() % 20 <<"\n";
     return os;
 }
 istream& operator>>(istream& is,Player& player)
@@ -720,9 +723,17 @@ int main()
                             teams[a].setPHealth(p1,false);
                             teams[a].hurtplayer(p1);
                         }
-
-
                     }
+
+                        else if(b==3)
+                        {
+                            cout<<"Old salary "<<teams[a].getPSalary(p1)<<" \n";
+                            cout<<"Introduce new salary "<<"\n";
+                            int newsal;
+                            cin>>newsal;
+                            teams[a].setPSalary(p1,newsal);
+                        }
+
 
                     else if(b>4||b<0)
                     {
