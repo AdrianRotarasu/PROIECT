@@ -1,0 +1,10 @@
+# depslib dependency file v1.0
+1604869662 source:c:\users\adria\onedrive\desktop\info\nba poo\main.cpp
+	<iostream>
+	<vector>
+	<string.h>
+	<math.h>
+	<fstream>
+	<stdlib.h>
+	<time.h>
+
