@@ -5,12 +5,28 @@
 #include <fstream>
 #include <stdlib.h>
 #include <time.h>
+
+
 using namespace std;
 
 ifstream player("players.in");
 ifstream team_players("team_players.in");
 ifstream team("teams.in");
-class Coach
+class Entity
+{
+    int age;
+public:
+    virtual void show() = 0;
+    int getAge()
+    {
+        return this->age;
+    }
+    void setAge(int age)
+    {
+        this->age=age;
+    }
+};
+class Coach:public Entity
 {
 private:
     char* name;
@@ -58,7 +74,10 @@ public:
     {
         return this->salary;
     }
-
+    void show()
+    {
+        cout << "Age is:"<<getAge();
+    }
 };
 
 class Player
@@ -225,12 +244,12 @@ public:
     {
 
     }
-    Team(int playernr,int fans,float overall, float revenue,char* name, int stats[])
+    Team(int playernr,int fans,float overall, float budget,char* name, int stats[])
     {
         this->playernr=playernr;
         this->fans=fans;
         this->overall=overall;
-        this->revenue=revenue;
+        this->budget=budget;
         this->stats[0]=stats[0];
         this->stats[1]=stats[1];
         this->stats[2]=stats[2];
@@ -245,8 +264,14 @@ public:
         playernr=obj.playernr;
         fans=obj.fans;
         overall=obj.overall;
+        for (int i=0; i<3; i++)
+            stats[i]=obj.stats[i];
         return *this;
 
+    }
+    float getOverall()
+    {
+        return this->overall;
     }
     int getStats(int i)
     {
@@ -279,7 +304,9 @@ public:
     }
     bool operator ==(Team &obj)
     {
-        return this->overall==obj.overall;
+        int i;
+        i=strcmp(name, obj.name);
+        return i;
     }
     bool operator <(Team &obj)
     {
@@ -314,6 +341,7 @@ public:
         for (int i=0; i<3; i++)
         {
             stats[i]=sum.getStat(i);
+
         }
     }
     friend istream& operator>>(istream& is, Team& team);
@@ -325,11 +353,12 @@ public:
     {
         return this->arena_seats;
     }
-    void setCoach(char* name, float bonusoverall, float salary)
+    void setCoach(char* name, float bonusoverall, float salary,int age)
     {
         coach.setName(name);
         coach.setBonusoverall(bonusoverall);
         coach.setSalary(salary);
+        coach.setAge(age);
     }
     friend ostream& operator<<(ostream& os, const Team& dt);
     int getPOverall(int i)
@@ -390,6 +419,10 @@ public:
     {
         return coach.getBonusoverall();
     }
+    int getCoachage()
+    {
+        return coach.getAge();
+    }
     string getPlayername(int i)
     {
         return player[i].getName();
@@ -426,7 +459,7 @@ public:
 ostream& operator<<(ostream& os, Team& dt)
 {
     srand((unsigned)time(0));
-    os<<dt.getName() <<" with "<< dt.getStats(0) + rand() % 20 <<"\n";
+    os<<dt.getName() <<" with "<<   rand() % 30 + 101 <<"\n";
     return os;
 }
 istream& operator>>(istream& is,Player& player)
@@ -465,12 +498,14 @@ istream& operator>>(istream& is,Team& team)
 istream& operator>>(istream& is,Coach& coach)
 {
     char s[20];
-    int i;
+    int i,a;
     cout<<"Type in the name of the coach:\n";
     is>>s;
     cout<<"Introduce coach's salary: \n";
     is>>i;
-    coach.setName(s);
+    cout<<"Introduce coach's age: \n";
+    is>>a;
+    coach.setAge(a);
     coach.setSalary(i);
     coach.setBonusoverall(25);
     return is;
@@ -490,7 +525,15 @@ private:
     int pointst2;
 
 public:
-    Match(Team& team1, Team& team2)
+    Team getTeam1()
+    {
+        return this->team1;
+    }
+    Team getTeam2()
+    {
+        return this->team2;
+    }
+    void setTeams(Team& team1, Team& team2)
     {
 
         this->team1 = team1;
@@ -504,36 +547,227 @@ public:
         return *this;
 
     }
-    Team getWinner()
+    virtual int getWinner()
     {
-        int matchresult;
-        int chancetl=8;
+
+        int chancetl=1;
         if(team1<team2)
         {
-            chancetl=chancetl*2;
+            chancetl++;
         }
 
         if(team1.getStats(0)>team2.getStats(0))
-            chancetl=chancetl*2;
+            chancetl++;
+
 
         if(team1.getStats(1)>team2.getStats(1))
-            chancetl=chancetl*2;
+            chancetl++;
 
         if(team1.getStats(2)>team1.getStats(2))
-            chancetl=chancetl*2;
+            chancetl++;
 
         srand((unsigned)time(0));
-        bool TrueFalse = (rand() % 100) < chancetl;
-        if(TrueFalse)
-            return this->team1;
+        int rez;
+        rez = rand() % 4;
+        if(rez < chancetl)
+        {
+            return 1;
+        }
         else
-            return this->team2;
-
+            return 0;
     }
 
 };
+
+class Finale:public Match
+{
+private:
+    Team team1, team2;
+    int nr_cups;
+public:
+    int getWinner()
+    {
+        int chancetl=1;
+        if(team1<team2)
+        {
+            chancetl++;
+        }
+
+        if(team1.getStats(0)>team2.getStats(0))
+            chancetl++;
+
+
+        if(team1.getStats(1)>team2.getStats(1))
+            chancetl++;
+
+        if(team1.getStats(2)>team1.getStats(2))
+            chancetl++;
+
+        srand((unsigned)time(0));
+        int rez;
+        rez = rand() % 4;
+        if(rez < chancetl)
+        {
+            nr_cups++;
+            return 1;
+        }
+        else
+            return 0;
+    }
+    int getCups()
+    {
+        return this->nr_cups;
+    }
+    void setCups(int nr_cups)
+    {
+        this->nr_cups=nr_cups;
+    }
+
+};
+
+class Manager:public Coach
+{
+private:
+    int free_days[8];
+    int nr_max_free_days;
+public:
+    void setNrFreeDays(int i)
+    {
+        this->nr_max_free_days=i;
+    }
+    int getNrFreeDays()
+    {
+        return this->nr_max_free_days;
+    }
+    void setFreeDays()
+    {
+        if(nr_max_free_days>0)
+        {
+            for(int i=1; i<8; i++)
+            {
+                if(i==1)
+                {
+                    cout<<"Is Monday a free day?(1-yes/0-no)\n";
+                    cin>>free_days[i];
+                    if(free_days[i]==1)
+                        nr_max_free_days--;
+                    system("CLS");
+                }
+                else if(i==2)
+                {
+                    cout<<"Is Tuesday a free day?(1-yes/0-no)\n";
+                    cin>>free_days[i];
+                    if(free_days[i]==1)
+                        nr_max_free_days--;
+                    system("CLS");
+                }
+                else if(i==3)
+                {
+                    cout<<"Is Wednesday a free day?(1-yes/0-no)\n";
+                    cin>>free_days[i];
+                    if(free_days[i]==1)
+                        nr_max_free_days--;
+                    system("CLS");
+                }
+                else if(i==4)
+                {
+                    cout<<"Is Thursday a free day?(1-yes/0-no)\n";
+                    cin>>free_days[i];
+                    if(free_days[i]==1)
+                        nr_max_free_days--;
+                    system("CLS");
+                }
+                else if(i==5)
+                {
+                    cout<<"Is Friday a free day?(1-yes/0-no)\n";
+                    cin>>free_days[i];
+                    if(free_days[i]==1)
+                        nr_max_free_days--;
+                    system("CLS");
+                }
+                else if(i==6)
+                {
+                    cout<<"Is Saturday a free day?(1-yes/0-no)\n";
+                    cin>>free_days[i];
+                    if(free_days[i]==1)
+                        nr_max_free_days--;
+                    system("CLS");
+                }
+                else
+                {
+                    cout<<"Is Sunday a free day?(1-yes/0-no)\n";
+                    cin>>free_days[i];
+                    if(free_days[i]==1)
+                        nr_max_free_days--;
+                    system("CLS");
+                }
+                if(nr_max_free_days<=0)
+                {
+                    cout<<"You have no more free days to chose\n";
+
+                    break;
+                }
+
+
+            }
+        }
+        else
+            cout<<"You have no more free days to chose\n";
+
+    }
+    void ShowFreeDays()
+    {
+        int ok=0;
+        cout<<"You are free on the next days:\n";
+        for(int i=1; i<8; i++)
+        {
+            if(free_days[i]==1)
+            {
+                ok=1;
+                if(i==1)
+                    cout<<"Monday ";
+                else if(i==2)
+                    cout<<"Tuesday ";
+                else if(i==3)
+                    cout<<"Wednesday ";
+                else if(i==4)
+                    cout<<"Thursday ";
+                else if(i==5)
+                    cout<<"Friday ";
+                else if(i==6)
+                    cout<<"Saturday ";
+                else
+                    cout<<"Sunday ";
+            }
+
+        }
+        cout<<"\n";
+        if(ok==0)
+            cout<<"You haven't selected the free days yet\n";
+    }
+};
+
+
+
 int main()
 {
+    Manager manager;
+    cout<<"Please introduce your name: ";
+    char np[100];
+    cin.get(np,100);
+    cout<<"\n";
+    cout<<"How old are you? ";
+    int ag;
+    cin>>ag;
+    manager.setAge(ag);
+    manager.setName(np);
+    manager.setNrFreeDays(3);
+    cout<<"What is your salary? ";
+    float sal;
+    cin>>sal;
+    cout<<"\n";
+    manager.setSalary(sal);
+    manager.setBonusoverall(10);
     Team twinner;
     Coach coach1;
     Team teams[5];
@@ -542,20 +776,24 @@ int main()
     teams[2].setName("Miami Heat");
     teams[3].setName("Boston Celtics");
     Player players[30];
-    teams[0].setCoach("Michael Malone",25,12000);
-    teams[1].setCoach("Frank Vogel",25,12000);
-    teams[2].setCoach("Erik Spoelstra",20,12000);
-    teams[3].setCoach("Brad Stevens",15,12000);
-
+    teams[0].setCoach("Michael Malone",25,12000,49);
+    teams[1].setCoach("Frank Vogel",25,12000,47);
+    teams[2].setCoach("Erik Spoelstra",20,12000,50);
+    teams[3].setCoach("Brad Stevens",15,12000,44);
+    teams[0].setBudget(25000000);
+    teams[1].setBudget(25000000);
+    teams[2].setBudget(25000000);
+    teams[3].setBudget(25000000);
     int z,teamnr=4,salary1;
     cout<<"1-Create your own team\n";
     cout<<"2-Use a predefine team\n";
-
     char s1[20],s2[20];
     int c1;
     cin>>c1;
     int a;
     int x=0;
+    Finale fmatch;
+    Match match;
     while(c1>2||c1<1)
     {
         cout<<"Unidentified command please enter agian: \n";
@@ -570,7 +808,7 @@ int main()
         teamnr++;
         cin>>teams[4];
         cin>>coach1;
-        teams[a].setCoach(coach1.getName(),coach1.getBonusoverall(),coach1.getSalary());
+        teams[a].setCoach(coach1.getName(),coach1.getBonusoverall(),coach1.getSalary(),coach1.getAge());
 
 
     }
@@ -644,8 +882,10 @@ int main()
     {
         cout<<"1-Manage Line-Up \n";
         cout<<"2-Budget Administration \n";
-        cout<<"3-Next Adversary \n";
+        cout<<"3-Next Adversary -League Match \n";
         cout<<"4-Manage Coach \n";
+        cout<<"5-Manage Free Days\n";
+        cout<<"6-Next Adversary -Championship Fianle \n";
         cout<<"0-EXIT \n";
         cin>>b;
         system("CLS");
@@ -725,14 +965,14 @@ int main()
                         }
                     }
 
-                        else if(b==3)
-                        {
-                            cout<<"Old salary "<<teams[a].getPSalary(p1)<<" \n";
-                            cout<<"Introduce new salary "<<"\n";
-                            int newsal;
-                            cin>>newsal;
-                            teams[a].setPSalary(p1,newsal);
-                        }
+                    else if(b==3)
+                    {
+                        cout<<"Old salary "<<teams[a].getPSalary(p1)<<" \n";
+                        cout<<"Introduce new salary "<<"\n";
+                        int newsal;
+                        cin>>newsal;
+                        teams[a].setPSalary(p1,newsal);
+                    }
 
 
                     else if(b>4||b<0)
@@ -749,7 +989,7 @@ int main()
         {
             while(b!=4&&b!=0)
             {
-                ///show budget
+
                 cout<<"1-Get a new player \n";
                 cout<<"2-See revenue per match \n";
                 cout<<"3-Change ticket prices \n";
@@ -763,6 +1003,7 @@ int main()
                     int nr1=teamnr*5+teams[a].getPlayernr()-5;
                     for(int i=nr1; i<30; i++)
                         cout<<i-nr1+1<<" "<<players[i].getName()<<"PPG: "<<players[i].getStat(0)<< "  APG: "<<players[i].getStat(1)<<"  BPG: "<<players[i].getStat(2)<<"  Salary: "<<players[i].getSalary()<<"\n";
+
                     cout<<"0-Add no players\n";
 
                     int p1;
@@ -770,12 +1011,13 @@ int main()
                     if(p1!=0)
                     {
                         Player aux;
-                        teams[a].addPlayer(players[p1+19]);
+                        teams[a].addPlayer(players[p1+nr1-1]);
                         aux=players[p1];
                         players[p1]=players[nr1];
                         players[nr1]=aux;
                         teams[a].calculateeverything();
                     }
+
                 }
                 else if(b==2)
                 {
@@ -789,7 +1031,7 @@ int main()
                     {
                         cout<<teams[a].getTicketprice()*teams[a].getArenaseats()<<"\n";
                     }
-                    cout<<"Team budget is : "<<teams[a].getBudget();
+                    cout<<"Team budget is : "<<teams[a].getBudget()<<"\n";
                 }
                 else if(b==3)
                 {
@@ -847,16 +1089,19 @@ int main()
                 }
                 else if(b==3)
                 {
-                    Match match(teams[a],teams[nmatch]);
 
-                    if(match.getWinner()==teams[a])
+                    match.setTeams(teams[a],teams[nmatch]);
+
+                    if(match.getWinner())
                     {
                         cout<<"Winner is ";
                         cout<<teams[a];
                     }
                     else
-                        std::cout<<"Loser is ";
-                    std::cout<<teams[a];
+                    {
+                        cout<<"Loser is ";
+                        cout<<teams[a];
+                    }
                     nmatch++;
                 }
                 else if(b<0||b>4)
@@ -865,7 +1110,90 @@ int main()
         }
         else if(b==4)
         {
-            cout<<teams[a].getCoachname()<<" is provinding a "<<teams[a].getCoachoverall()<<"% boost to our team\n";
+            cout<<teams[a].getCoachname()<<"at age: "<<teams[a].getCoachage()<<" is provinding a "<<teams[a].getCoachoverall()<<"% boost to our team\n";
+        }
+        else if(b==5)
+        {
+            cout<<"1-Show free days\n";
+            cout<<"2-Select free days\n";
+            cin>>b;
+            if(b==1)
+            {
+                manager.ShowFreeDays();
+
+            }
+            else if(b==2)
+            {
+                cout<<"You have "<<manager.getNrFreeDays()<<" free days avalable\n";
+                manager.setFreeDays();
+            }
+
+        }
+        else if(b==6)
+        {
+            nmatch++;
+            nmatch=nmatch%teamnr;
+            if(nmatch==a)
+            {
+                nmatch++;
+            }
+
+            while(b!=4&&b!=0)
+            {
+
+
+                cout<<"1-Show adversary name and line-up\n";
+                cout<<"2-Show chances to win\n";
+                cout<<"3-Simulate the next match\n";
+                cout<<"4-See how many finals you won\n";
+                cout<<"5-Back\n";
+                cout<<"0-EXIT\n";
+
+                cin>>b;
+                system("CLS");
+                if(b==1)
+                {
+                    cout<<teams[nmatch].getName()<<"\n";
+                    for(int i=1; i<5; i++)
+                        cout<<teams[nmatch].getPlayername(i)<<"\n";
+
+
+                }
+                else if(b==2)
+                {
+                    if(teams[a]<teams[nmatch])
+                        cout<<"This match is a hard to win match, try to change your line-up\n";
+                    else if(teams[a]>teams[nmatch])
+                        cout<<"This match is easier than most but you can still improve your line-up\n";
+                    else if(teams[a]==teams[nmatch])
+                        cout<<"This match is pretty even try to do some changes to your line-up\n";
+                }
+                else if(b==3)
+                {
+
+                    fmatch.setTeams(teams[a],teams[nmatch]);
+
+                    if(fmatch.getWinner())
+                    {
+                        cout<<"Winner is ";
+                        cout<<teams[a];
+                    }
+                    else
+                    {
+                        cout<<"Loser is ";
+                        cout<<teams[a];
+                    }
+                    nmatch++;
+                }
+                else if(b==4)
+                {
+                    int cu;
+                    cu=fmatch.getCups();
+                    cout<<"Your team has won :"<< cu<<" cups.\n";
+                }
+                else if(b<0||b>5)
+                    cout<<"Unidentified command please enter agian: \n";
+            }
         }
         else if(b!=0)
             cout<<"Unidentified command please enter agian: \n";
