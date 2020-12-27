@@ -5,7 +5,8 @@
 #include <fstream>
 #include <stdlib.h>
 #include <time.h>
-
+#include <iterator>
+#include <set>
 
 using namespace std;
 
@@ -806,6 +807,7 @@ int main()
     cin>>c1;
     int a;
     int x=0;
+
     Finale fmatch;
     Match match;
     while(c1>2||c1<1)
@@ -883,7 +885,7 @@ int main()
             if(x>1)
             {
                 system("CLS");
-                cout<<"Unidentified command please enter agian: \n";
+                cout<<"Unidentified command please enter again: \n";
                 x=0;
             }
         }
@@ -901,8 +903,22 @@ int main()
         cout<<"5-Manage Free Days\n";
         cout<<"6-Next Adversary -Championship Fianle \n";
         cout<<"0-EXIT \n";
+        try
+        {
         cin>>b;
+        if(b>6||b<0)
+            throw 1;
+        }
+        catch(int e)
+        {
+            cout << "An exception occurred. Exception Nr. " << e << '\n';
+            cout << "Please insert a number in the parameters:";
+            cin>>b;
+        }
         system("CLS");
+
+
+
         if(b==1)
         {
             while(b!=3&&b!=0)
@@ -1163,7 +1179,18 @@ int main()
                 cout<<"5-Back\n";
                 cout<<"0-EXIT\n";
 
+                try
+            {
+            cin>>b;
+            if(b>6||b<0)
+                throw 1;
+            }
+            catch(int e)
+            {
+                cout << "An exception occurred. Exception Nr. " << e << '\n';
+                cout << "Please insert a number in the parameters:";
                 cin>>b;
+            }
                 system("CLS");
                 if(b==1)
                 {
@@ -1208,8 +1235,7 @@ int main()
                     cu=fmatch.getCups();
                     cout<<"Your team has won :"<< cu<<" cups.\n";
                 }
-                else if(b<0||b>5)
-                    cout<<"Unidentified command please enter agian: \n";
+
             }
         }
         else if(b!=0)
