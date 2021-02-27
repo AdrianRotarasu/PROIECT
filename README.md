@@ -1,2 +1,2 @@
 # PROIECT
-Rotarasu Adrian-Valentin grupa 212
+Rotarasu Adrian-Valentin
